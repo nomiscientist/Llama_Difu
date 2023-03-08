@@ -99,13 +99,13 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
         loader = BeautifulSoupWebReader()
         chat = OpenAIChat(model_name="gpt-3.5-turbo", openai_api_key=api_key)
-        keywords = chat.generate([f"Please extract no more than 2 keywords from the following sentence that are suitable for Google search, and separate each keyword with a space: {question}"]).generations[0][0].text.strip()
-        links = []
-        for keyword in keywords.split():
-            print(f"Googling: {keyword}")
-            search_iter = search(keywords)
-            links += [next(search_iter) for i in range(2)]
-        links = list(set(links))
+        keywords = chat.generate([f"Give a concise sentence for Google search based on the following words. You do not have to stick to the original words, but be sure to give the search term that is most likely to search for the correct answer. The words is: {question}"]).generations[0][0].text.strip()
+        keywords.replace("\"", "")
+        keywords.replace(".", "")
+        keywords.strip()
+        search_iter = search(keywords)
+        links = [next(search_iter) for _ in range(5)]
+        print("\n".join(links))
         print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
