@@ -82,7 +82,7 @@ def parse_text(text):
     return text
 
 def chat_ai(api_key, index_select, question, prompt_tmpl, context, chatbot):
-    response = ask_ai(api_key, index_select, question, prompt_tmpl, context)
+    response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=1)
     response = parse_text(response)
     context.append({"role": "user", "content": question})
     context.append({"role": "assistant", "content": response})
@@ -91,13 +91,13 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, context, chatbot):
 
 
 
-def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[]):
+def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], temprature=0):
     os.environ["OPENAI_API_KEY"] = api_key
     index = load_index(index_select)
 
     prompt = QuestionAnswerPrompt(prompt_tmpl)
 
-    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
+    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
     try:
         response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=3, text_qa_template=prompt)
     except Exception as e:
