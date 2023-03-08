@@ -6,9 +6,13 @@ from utils import *
 
 os.environ['OPENAI_API_KEY'] = ""
 
+def reset_textbox():
+    return gr.update(value='')
+
 with gr.Blocks() as llama_difu:
     api_key = gr.Textbox(label="OpenAI API Key", value="", type="password")
-    
+    chatContext = gr.State([])
+
     with gr.Tab("Ask"):
         with gr.Box():
             gr.Markdown("**Select index**")
@@ -22,17 +26,18 @@ with gr.Blocks() as llama_difu:
                 gr.Markdown("## Ask")
                 with gr.Column():
                     with gr.Accordion("Advance", open=False):
-                        prompt_tmpl = gr.Textbox(placeholder="Prompt Template", value="Context information is below.\n----------\n{context_str}\n----------\nGiven the above context answer the following question. Answer in bullet points.\n\nQuestion: {query_str}", 
+                        prompt_tmpl = gr.Textbox(placeholder="Prompt Template", value="Context information is below.\n----------\n{context_str}\n----------\nGiven the above context answer the following question. Answer in bullet points.\n\nQuestion: {query_str}",
                                                  label="prompt_tmpl")
                     query_box = gr.Textbox(lines=3, show_label=False).style(container=False)
                 query_btn = gr.Button("🚀", variant="primary")
         with gr.Box():
             gr.Markdown("## Result")
             answer = gr.Markdown("")
-            
+
     with gr.Tab("Chat"):
-        gr.Markdown("## To Do ......")
-            
+        chatbot = gr.Chatbot()
+        chatInput = gr.Textbox(lines=3, show_label=False).style(container=False)
+
     with gr.Tab("Construct"):
         with gr.Row():
             with gr.Column():
@@ -49,16 +54,18 @@ with gr.Blocks() as llama_difu:
                 with gr.Column():
                     with gr.Row():
                         with gr.Column(scale=7):
-                            json_select = gr.Dropdown(choices=refresh_json_list(plain=True), show_label=False).style(container=False)
+                            json_select = gr.Dropdown(choices=refresh_json_list(plain=True), show_label=False, multiselect=False).style(container=False)
                         with gr.Column(scale=1):
                             json_refresh_btn = gr.Button("🔄Refresh Index List")
                     json_confirm_btn = gr.Button("🔎View json")
                     json_display = gr.JSON(label="View index json")
-        
+
     index_refresh_btn.click(refresh_json_list, None, [index_select])
     query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl], [answer])
+    chatInput.submit(chat_ai, [api_key, index_select, chatInput, prompt_tmpl, chatContext, chatbot], [chatContext, chatbot])
+    chatInput.submit(reset_textbox, [], [chatInput])
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
-    
+
 if __name__ == '__main__':
     llama_difu.queue().launch()

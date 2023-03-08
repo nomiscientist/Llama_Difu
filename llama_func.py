@@ -9,7 +9,7 @@ from utils import *
 
 def save_index(index, index_name):
     file_path = f"./index/{index_name}.json"
-    
+
     if not os.path.exists(file_path):
         index.save_to_disk(file_path)
         print(f'Saved file "{file_path}".')
@@ -34,31 +34,41 @@ def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outp
     with open(tmp_file.name, 'r', encoding="utf-8") as f:
         documents_set.append(f.read())
     documents = [Document(k) for k in documents_set]
-    
+
     # Customizing LLM
     llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
     prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap)
-    
+
     index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
-    
+
     save_index(index, index_name)
 
     newlist = refresh_json_list(plain=True)
     return newlist, newlist
 
+def chat_ai(api_key, index_select, question, prompt_tmpl, context, chatbot):
+    response = ask_ai(api_key, index_select, question, prompt_tmpl, context)
+    context.append({"role": "user", "content": question})
+    context.append({"role": "assistant", "content": response})
+    chatbot.append((question, response))
+    return context, chatbot
 
-def ask_ai(api_key, index_select, question, prompt_tmpl):
+
+
+def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[]):
+    os.environ["OPENAI_API_KEY"] = api_key
     index = load_index(index_select)
-    
+
     prompt = QuestionAnswerPrompt(prompt_tmpl)
-    
-    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
+
+    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
     try:
         response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=3, text_qa_template=prompt)
     except Exception as e:
         print(e)
-        
+
     print(f"Response: {response.response}")
+    os.environ["OPENAI_API_KEY"] = ""
     return response.response
 
 
@@ -66,7 +76,7 @@ def load_index(index_name):
     index_path = f"./index/{index_name}.json"
     if not os.path.exists(index_path):
         return None
-    
+
     index = GPTSimpleVectorIndex.load_from_disk(index_path)
     return index
 
@@ -75,5 +85,5 @@ def display_json(json_select):
     if not os.path.exists(json_path):
         return None
     documents = JSONReader().load_data(f"./index/{json_select}.json")
-    
+
     return documents[0]
