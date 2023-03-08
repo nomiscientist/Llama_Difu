@@ -36,7 +36,7 @@ with gr.Blocks() as llama_difu:
 
     with gr.Tab("Chat"):
         chatbot = gr.Chatbot()
-        chatInput = gr.Textbox(lines=3, show_label=False).style(container=False)
+        chatInput = gr.Textbox(show_label=False, placeholder="Type here...").style(container=False)
 
     with gr.Tab("Construct"):
         with gr.Row():

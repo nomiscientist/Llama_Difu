@@ -46,8 +46,44 @@ def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outp
     newlist = refresh_json_list(plain=True)
     return newlist, newlist
 
+def parse_text(text):
+    lines = text.split("\n")
+    lines = [line for line in lines if line != ""]
+    count = 0
+    firstline = False
+    for i, line in enumerate(lines):
+        if "```" in line:
+            count += 1
+            items = line.split('`')
+            if count % 2 == 1:
+                lines[i] = f'<pre><code class="{items[-1]}">'
+                firstline = True
+            else:
+                lines[i] = f'</code></pre>'
+        else:
+            if i > 0:
+                if count % 2 == 1:
+                    line = line.replace("&", "&amp;")
+                    line = line.replace("\"", "`\"`")
+                    line = line.replace("\'", "`\'`")
+                    line = line.replace("<", "&lt;")
+                    line = line.replace(">", "&gt;")
+                    line = line.replace(" ", "&nbsp;")
+                    line = line.replace("*", "&ast;")
+                    line = line.replace("_", "&lowbar;")
+                    line = line.replace("#", "&#35;")
+                    line = line.replace("-", "&#45;")
+                    line = line.replace(".", "&#46;")
+                    line = line.replace("!", "&#33;")
+                    line = line.replace("(", "&#40;")
+                    line = line.replace(")", "&#41;")
+                lines[i] = "<br>"+line
+    text = "".join(lines)
+    return text
+
 def chat_ai(api_key, index_select, question, prompt_tmpl, context, chatbot):
     response = ask_ai(api_key, index_select, question, prompt_tmpl, context)
+    response = parse_text(response)
     context.append({"role": "user", "content": question})
     context.append({"role": "assistant", "content": response})
     chatbot.append((question, response))
