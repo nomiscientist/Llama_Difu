@@ -105,6 +105,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
             print(f"Googling: {keyword}")
             search_iter = search(keywords)
             links += [next(search_iter) for i in range(2)]
+        links = list(set(links))
         print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
