@@ -1,9 +1,12 @@
 import os
 import llama_index
-from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader
+from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader, download_loader
 from llama_index import Document, LLMPredictor, PromptHelper, QuestionAnswerPrompt, JSONReader
 from langchain.llms import OpenAIChat
 from zipfile import ZipFile
+from googlesearch import search
+import traceback
+import openai
 
 from utils import *
 
@@ -81,33 +84,57 @@ def parse_text(text):
     text = "".join(lines)
     return text
 
-def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot):
+def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=False):
+    os.environ["OPENAI_API_KEY"] = api_key
     if chat_tone == 0:
         temprature = 2
     elif chat_tone == 1:
         temprature = 1
     else:
         temprature = 0.5
-    response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
+    if not search_mode:
+        response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
+    else:
+        print(f"You asked: {question}")
+        BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
+        loader = BeautifulSoupWebReader()
+        chat = OpenAIChat(model_name="gpt-3.5-turbo", openai_api_key=api_key)
+        keywords = chat.generate([f"Please extract no more than 2 keywords from the following sentence that are suitable for Google search, and separate each keyword with a space: {question}"]).generations[0][0].text.strip()
+        links = []
+        for keyword in keywords.split():
+            print(f"Googling: {keyword}")
+            search_iter = search(keywords)
+            links += [next(search_iter) for i in range(2)]
+        print("Extracting data from links...")
+        print('\n'.join(links))
+        documents = loader.load_data(urls=links)
+        index = GPTSimpleVectorIndex(documents)
+        print("Generating response...")
+        response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature, raw = index)
     response = parse_text(response)
     context.append({"role": "user", "content": question})
     context.append({"role": "assistant", "content": response})
     chatbot.append((question, response))
+    os.environ["OPENAI_API_KEY"] = ""
     return context, chatbot
 
 
 
-def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], temprature=0):
+def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], temprature=0, raw = None):
     os.environ["OPENAI_API_KEY"] = api_key
-    index = load_index(index_select)
+    if raw is not None:
+        index = raw
+    else:
+        index = load_index(index_select)
 
     prompt = QuestionAnswerPrompt(prompt_tmpl)
 
     llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
     try:
         response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=3, text_qa_template=prompt)
-    except Exception as e:
-        print(e)
+    except:
+        traceback.print_exc()
+        return ""
 
     print(f"Response: {response.response}")
     os.environ["OPENAI_API_KEY"] = ""

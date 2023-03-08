@@ -11,7 +11,8 @@ def reset_textbox():
 
 with gr.Blocks() as llama_difu:
     api_key = gr.Textbox(label="OpenAI API Key", value="", type="password")
-    chatContext = gr.State([])
+    chat_context = gr.State([])
+    new_google_chat_context = gr.State([])
 
     with gr.Tab("Ask"):
         with gr.Box():
@@ -34,8 +35,10 @@ with gr.Blocks() as llama_difu:
             gr.Markdown("## Result")
             answer = gr.Markdown("")
 
-    with gr.Tab("Chat"):
-        chat_tone = gr.Radio(["Creative", "Balanced", "Precise"], label="Chatbot Tone", type="index", value="Balanced")
+    with gr.Tab("New Google"):
+        with gr.Row():
+            chat_tone = gr.Radio(["Creative", "Balanced", "Precise"], label="Chatbot Tone", type="index", value="Balanced")
+            search_google = gr.Checkbox(label="🔍 Search Google", value=False)
         chatbot = gr.Chatbot()
         with gr.Row():
             with gr.Column(min_width=50, scale=1):
@@ -70,11 +73,11 @@ with gr.Blocks() as llama_difu:
 
     index_refresh_btn.click(refresh_json_list, None, [index_select])
     query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl], [answer])
-    chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chatContext, chatbot], [chatContext, chatbot])
+    chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_google], [chat_context, chatbot])
     chat_input.submit(reset_textbox, [], [chat_input])
-    chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chatContext, chatbot], [chatContext, chatbot])
+    chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot], [chat_context, chatbot])
     chat_submit_btn.click(reset_textbox, [], [chat_input])
-    chat_empty_btn.click(lambda: ([], []), None, [chatContext, chatbot])
+    chat_empty_btn.click(lambda: ([], []), None, [chat_context, chatbot])
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
 
