@@ -35,9 +35,11 @@ with gr.Blocks() as llama_difu:
             answer = gr.Markdown("")
 
     with gr.Tab("Chat"):
-        chat_tone = gr.Radio(["Creative", "Balanced", "Percise"], label="Chatbot Tone", type="index", value="Balanced")
+        chat_tone = gr.Radio(["Creative", "Balanced", "Precise"], label="Chatbot Tone", type="index", value="Balanced")
         chatbot = gr.Chatbot()
         with gr.Row():
+            with gr.Column(min_width=50, scale=1):
+                chat_empty_btn = gr.Button("🧹", variant="secondary")
             with gr.Column(scale=12):
                 chat_input = gr.Textbox(show_label=False, placeholder="Type here...").style(container=False)
             with gr.Column(min_width=50, scale=1):
@@ -72,6 +74,7 @@ with gr.Blocks() as llama_difu:
     chat_input.submit(reset_textbox, [], [chat_input])
     chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chatContext, chatbot], [chatContext, chatbot])
     chat_submit_btn.click(reset_textbox, [], [chat_input])
+    chat_empty_btn.click(lambda: ([], []), None, [chatContext, chatbot])
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
 
