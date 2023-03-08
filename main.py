@@ -35,12 +35,13 @@ with gr.Blocks() as llama_difu:
             answer = gr.Markdown("")
 
     with gr.Tab("Chat"):
+        chat_tone = gr.Radio(["Creative", "Balanced", "Percise"], label="Chatbot Tone", type="index", value="Balanced")
         chatbot = gr.Chatbot()
         with gr.Row():
             with gr.Column(scale=12):
-                chatInput = gr.Textbox(show_label=False, placeholder="Type here...").style(container=False)
+                chat_input = gr.Textbox(show_label=False, placeholder="Type here...").style(container=False)
             with gr.Column(min_width=50, scale=1):
-                chatSubmitBtn = gr.Button("🚀", variant="primary")
+                chat_submit_btn = gr.Button("🚀", variant="primary")
 
 
     with gr.Tab("Construct"):
@@ -67,10 +68,10 @@ with gr.Blocks() as llama_difu:
 
     index_refresh_btn.click(refresh_json_list, None, [index_select])
     query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl], [answer])
-    chatInput.submit(chat_ai, [api_key, index_select, chatInput, prompt_tmpl, chatContext, chatbot], [chatContext, chatbot])
-    chatInput.submit(reset_textbox, [], [chatInput])
-    chatSubmitBtn.click(chat_ai, [api_key, index_select, chatInput, prompt_tmpl, chatContext, chatbot], [chatContext, chatbot])
-    chatSubmitBtn.click(reset_textbox, [], [chatInput])
+    chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chatContext, chatbot], [chatContext, chatbot])
+    chat_input.submit(reset_textbox, [], [chat_input])
+    chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chatContext, chatbot], [chatContext, chatbot])
+    chat_submit_btn.click(reset_textbox, [], [chat_input])
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
 

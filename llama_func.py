@@ -81,8 +81,14 @@ def parse_text(text):
     text = "".join(lines)
     return text
 
-def chat_ai(api_key, index_select, question, prompt_tmpl, context, chatbot):
-    response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=1)
+def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot):
+    if chat_tone == 0:
+        temprature = 2
+    elif chat_tone == 1:
+        temprature = 1
+    else:
+        temprature = 0.5
+    response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
     response = parse_text(response)
     context.append({"role": "user", "content": question})
     context.append({"role": "assistant", "content": response})
