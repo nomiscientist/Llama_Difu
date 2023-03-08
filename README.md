@@ -1,6 +1,12 @@
 # Llama_difu —— Llama Do it for You
 
-A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index).
+[![LICENSE](https://img.shields.io/github/license/MZhao-ouo/Llama_difu)](https://github.com/MZhao-ouo/Llama_difu/blob/main/LICENSE)
+[![Web-UI](https://img.shields.io/badge/WebUI-Gradio-fb7d1a?style=flat)](https://gradio.app/)
+[![base](https://img.shields.io/badge/Base-Llama_index-cdc4d6?style=flat&logo=github)](https://github.com/jerryjliu/gpt_index)
+
+---
+
+A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index). Allow ChatGPT to access your own database.
 ![image](https://user-images.githubusercontent.com/70903329/223749069-4aec7f09-7ff9-4fe5-9958-945cf2f64909.png)
 
 ## Feature
