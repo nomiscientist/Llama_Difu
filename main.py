@@ -9,6 +9,17 @@ os.environ['OPENAI_API_KEY'] = ""
 def reset_textbox():
     return gr.update(value='')
 
+default_prompt_template = """
+Context information:
+
+{context_str}
+
+Instructions: Given the above context answer the following question. Answer in bullet points.
+Query: {query_str}
+Reply in 中文
+"""
+# Reply in 日本語
+
 with gr.Blocks() as llama_difu:
     api_key = gr.Textbox(label="OpenAI API Key", value="", type="password")
     chat_context = gr.State([])
@@ -27,7 +38,7 @@ with gr.Blocks() as llama_difu:
                 gr.Markdown("## Ask")
                 with gr.Column():
                     with gr.Accordion("Advance", open=False):
-                        prompt_tmpl = gr.Textbox(placeholder="Prompt Template", value="Context information is below.\n----------\n{context_str}\n----------\nGiven the above context answer the following question. Answer in bullet points.\n\nQuestion: {query_str}",
+                        prompt_tmpl = gr.Textbox(placeholder="Prompt Template", value=default_prompt_template,
                                                  label="prompt_tmpl")
                     query_box = gr.Textbox(lines=3, show_label=False).style(container=False)
                 query_btn = gr.Button("🚀", variant="primary")
