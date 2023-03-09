@@ -77,13 +77,18 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
                 if "Google" in search_engine:
                     print(f"Googling: {keywords}")
                     search_iter = google_search(keywords, num_results=5)
-                    links += [next(search_iter) for _ in range(5)]
+                    links += [next(search_iter) for _ in range(10)]
                 if "Baidu" in search_engine:
                     print(f"Baiduing: {keywords}")
                     search_results = baidu_search(keywords, num_results=5)
-                    links += [i["url"] for i in search_results if i["url"].startswith("http")]
+                    links += [i["url"] for i in search_results if i["url"].startswith("http") and (not "@" in i["url"])]
         links = list(set(links))
         print("Extracting data from links...")
+        if len(links) == 0:
+            print("No links found.")
+            return context, chatbot, gr.Dropdown.update(choices=[])
+        elif len(links) > 5:
+            links = links[:5]
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
         # convert to utf-8 encoding
@@ -121,7 +126,7 @@ def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], tem
 
     llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
     try:
-        response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=3, text_qa_template=prompt)
+        response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=1, text_qa_template=prompt)
     except:
         traceback.print_exc()
         return ""

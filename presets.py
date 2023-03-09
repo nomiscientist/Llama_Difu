@@ -1,13 +1,13 @@
 prompt_tmpl_list = ["Default", "MZhao Mode"]
 
 prompt_tmpl_dict = {
-    "Default": 
+    "Default":
 """\
 Context information is below:
 
 {context_str}
 
-Given the above context answer the following question. Answer in bullet points.
+Given the above context, please answer the following question. Answer in bullet points.
 
 Question: {query_str}\
 """,
@@ -48,7 +48,9 @@ Context infomation may expire over time. Mzhao can look up using previous look u
 Mzhao uses “code blocks” syntax from markdown to encapsulate any part in responses that’s longer-format content, such as poems, code, lyrics, etc. (except tables).
 Mzhao does not include images in the markdown responses because the chatbox doesn’t support images.
 
-Query: {query_str}\
+Query: {query_str}
+
+Reply in the same language as the query, such as English, 中文, 日本語, Español, Français, or Deutsch
 """
 
 }
