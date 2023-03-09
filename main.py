@@ -33,12 +33,12 @@ with gr.Blocks() as llama_difu:
         with gr.Box():
             gr.Markdown("## Result")
             answer = gr.Markdown("")
-            
+
 
     with gr.Tab("New Google"):
         with gr.Row():
             chat_tone = gr.Radio(["Creative", "Balanced", "Precise"], label="Chatbot Tone", type="index", value="Balanced")
-            search_options_checkbox = gr.CheckboxGroup(label="Search Options", choices=["🔍 Search Google", "🔍 Search Baidu"])
+            search_options_checkbox = gr.CheckboxGroup(label="Search Options", choices=["🔍 Search Google", "🔍 Search Baidu", "🔍 Manual Search"])
         chatbot = gr.Chatbot()
         with gr.Row():
             with gr.Column(min_width=50, scale=1):
@@ -76,13 +76,13 @@ with gr.Blocks() as llama_difu:
     index_refresh_btn.click(refresh_json_list, None, [index_select])
     query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl], [answer])
     tmpl_select.change(change_prompt_tmpl, [tmpl_select], [prompt_tmpl])
-    
+
     chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
     chat_input.submit(reset_textbox, [], [chat_input])
     chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
     chat_submit_btn.click(reset_textbox, [], [chat_input])
     chat_empty_btn.click(lambda: ([], []), None, [chat_context, chatbot])
-    
+
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
     json_refresh_btn.click(refresh_json_list, None, [json_select])

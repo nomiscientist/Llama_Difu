@@ -55,14 +55,14 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
     print(f"Question: {question}")
     if question=="":
         question = suggested_user_question
-        
+
     if chat_tone == 0:
         temprature = 2
     elif chat_tone == 1:
         temprature = 1
     else:
         temprature = 0.5
-        
+
     if not search_mode:
         response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
     else:
@@ -85,13 +85,21 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
                     print(f"Baiduing: {keywords}")
                     search_results = baidu_search(keywords, num_results=5)
                     links += [i["url"] for i in search_results if i["url"].startswith("http") and (not "@" in i["url"])]
+                if "Manual" in search_engine:
+                    print(f"Searching manually: {keywords}")
+                    print("Please input links manually. (Enter 'q' to quit.)")
+                    while True:
+                        link = input("请手动输入一个链接：\n")
+                        if link == "q":
+                            break
+                        else:
+                            links.append(link)
         links = list(set(links))
-        print("Extracting data from links...")
         if len(links) == 0:
             print("No links found.")
-            return context, chatbot, gr.Dropdown.update(choices=[])
         elif len(links) > 5:
             links = links[:5]
+        print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
         # convert to utf-8 encoding
@@ -128,7 +136,7 @@ def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], tem
     prompt = QuestionAnswerPrompt(prompt_tmpl)
 
     llm_predictor = LLMPredictor(llm=OpenAI(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
-    
+
     try:
         response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=1, text_qa_template=prompt)
     except:
