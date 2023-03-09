@@ -53,7 +53,7 @@ with gr.Blocks() as llama_difu:
     with gr.Tab("Construct"):
         with gr.Row():
             with gr.Column():
-                upload_file = gr.File()
+                upload_file = gr.Files()
                 with gr.Row():
                     max_input_size = gr.Slider(256, 4096, 4096, step=1, label="Max Input Size", interactive=True, show_label=True)
                     num_outputs = gr.Slider(256, 4096, 512, step=1, label="Num Outputs", interactive=True, show_label=True)
@@ -86,6 +86,7 @@ with gr.Blocks() as llama_difu:
     construct_btn.click(construct_index, [api_key, upload_file, new_index_name, max_input_size, num_outputs, max_chunk_overlap], [index_select, json_select])
     json_confirm_btn.click(display_json, [json_select], [json_display])
     json_refresh_btn.click(refresh_json_list, None, [json_select])
+
 
 if __name__ == '__main__':
     llama_difu.queue().launch()
