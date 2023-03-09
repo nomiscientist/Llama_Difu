@@ -1,5 +1,4 @@
 import os
-import llama_index
 from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader, download_loader
 from llama_index import Document, LLMPredictor, PromptHelper, QuestionAnswerPrompt, JSONReader
 from langchain.llms import OpenAIChat
