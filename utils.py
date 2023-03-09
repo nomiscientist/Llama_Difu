@@ -22,3 +22,38 @@ def upload_file(file_obj):
                 }
             )
     return files
+
+def parse_text(text):
+    lines = text.split("\n")
+    lines = [line for line in lines if line != ""]
+    count = 0
+    firstline = False
+    for i, line in enumerate(lines):
+        if "```" in line:
+            count += 1
+            items = line.split('`')
+            if count % 2 == 1:
+                lines[i] = f'<pre><code class="{items[-1]}">'
+                firstline = True
+            else:
+                lines[i] = f'</code></pre>'
+        else:
+            if i > 0:
+                if count % 2 == 1:
+                    line = line.replace("&", "&amp;")
+                    line = line.replace("\"", "`\"`")
+                    line = line.replace("\'", "`\'`")
+                    line = line.replace("<", "&lt;")
+                    line = line.replace(">", "&gt;")
+                    line = line.replace(" ", "&nbsp;")
+                    line = line.replace("*", "&ast;")
+                    line = line.replace("_", "&lowbar;")
+                    line = line.replace("#", "&#35;")
+                    line = line.replace("-", "&#45;")
+                    line = line.replace(".", "&#46;")
+                    line = line.replace("!", "&#33;")
+                    line = line.replace("(", "&#40;")
+                    line = line.replace(")", "&#41;")
+                lines[i] = "<br>"+line
+    text = "".join(lines)
+    return text

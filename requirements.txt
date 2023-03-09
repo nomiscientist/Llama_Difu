@@ -1,4 +1,4 @@
 gradio
 llama_index
-zipfile
 googlesearch-python
+baidusearch
