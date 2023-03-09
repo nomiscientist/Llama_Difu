@@ -99,13 +99,16 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
         loader = BeautifulSoupWebReader()
         chat = OpenAIChat(model_name="gpt-3.5-turbo", openai_api_key=api_key)
-        search_term = chat.generate([f"Give a concise sentence for Google search based on the following words. You do not have to stick to the original words, but be sure to give the search term that is most likely to search for the correct answer. The words is: {question}"]).generations[0][0].text.strip()
-        search_term = search_term.replace('"', '')
-        search_term = search_term.replace(".", "")
-        print(f"Googling: {search_term}")
-        search_iter = search(search_term, num_results=5)
-        links = [next(search_iter) for _ in range(5)]
-        print("\n".join(links))
+        search_terms = chat.generate([f"Please extract search terms from the user’s question. The search terms is a concise sentence, which will be searched on Google to obtain relevant information to answer the user’s question, too generalized search terms doesn’t help. Please provide no more than two search terms. Please provide the most relevant search terms only, the search terms should directly correspond to the user’s question. Please separate different search items with commas, with no quote marks. The user’s question is: {question}"]).generations[0][0].text.strip()
+        search_terms = search_terms.replace('"', '')
+        search_terms = search_terms.replace(".", "")
+        links = []
+        for keywords in search_terms.split(","):
+            keywords = keywords.strip()
+            print(f"Googling: {keywords}")
+            search_iter = search(keywords, num_results=5)
+            links += [next(search_iter) for _ in range(5)]
+        links = list(set(links))
         print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
