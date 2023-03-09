@@ -25,8 +25,8 @@ with gr.Blocks() as llama_difu:
                 gr.Markdown("## Ask")
                 with gr.Column():
                     with gr.Accordion("Prompt Template", open=False):
-                        # gr.Markdown("**Prompt Template**")
-                        tmpl_select = gr.Radio(prompt_tmpl_list, value="Default", show_label=False, interactive=True)
+                        sim_k = gr.Slider(1, 10, 1, step=1, label="Similarity", interactive=True, show_label=True)
+                        tmpl_select = gr.Radio(prompt_tmpl_list, value="Default", label="pre-prompt-template", interactive=True)
                         prompt_tmpl = gr.Textbox(value=prompt_tmpl_dict["Default"], show_label=False)
                     query_box = gr.Textbox(lines=3, show_label=False).style(container=False)
                 query_btn = gr.Button("🚀", variant="primary")
@@ -74,7 +74,7 @@ with gr.Blocks() as llama_difu:
                     json_display = gr.JSON(label="View index json")
 
     index_refresh_btn.click(refresh_json_list, None, [index_select])
-    query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl], [answer])
+    query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl, sim_k], [answer])
     tmpl_select.change(change_prompt_tmpl, [tmpl_select], [prompt_tmpl])
 
     chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])

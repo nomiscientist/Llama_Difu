@@ -126,7 +126,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
 
 
 
-def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], temprature=0, raw = None):
+def ask_ai(api_key, index_select, question, prompt_tmpl, sim_k=1, prefix_messages=[], temprature=0, raw = None):
     os.environ["OPENAI_API_KEY"] = api_key
     if raw is not None:
         index = raw
@@ -138,7 +138,7 @@ def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], tem
     llm_predictor = LLMPredictor(llm=OpenAI(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
 
     try:
-        response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=1, text_qa_template=prompt)
+        response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=sim_k, text_qa_template=prompt)
     except:
         traceback.print_exc()
         return ""
