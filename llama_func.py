@@ -84,8 +84,11 @@ def parse_text(text):
     text = "".join(lines)
     return text
 
-def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=False):
+def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=False, suggested_user_question = ""):
     os.environ["OPENAI_API_KEY"] = api_key
+    print(f"Question: {question}")
+    if question=="":
+        question = suggested_user_question
     if chat_tone == 0:
         temprature = 2
     elif chat_tone == 1:
@@ -115,12 +118,21 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         index = GPTSimpleVectorIndex(documents)
         print("Generating response...")
         response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature, raw = index)
+    response = response.split("\n")
+    suggested_next_turns = []
+    for index, line in enumerate(response):
+        if "next user turn" in line:
+            suggested_next_turns = response[index+1:]
+            response = response[:index]
+            break
+    suggested_next_turns = [i.split()[1] for i in suggested_next_turns]
+    response = "\n".join(response)
     response = parse_text(response)
     context.append({"role": "user", "content": question})
     context.append({"role": "assistant", "content": response})
     chatbot.append((question, response))
     os.environ["OPENAI_API_KEY"] = ""
-    return context, chatbot
+    return context, chatbot, gr.Dropdown.update(choices=suggested_next_turns)
 
 
 
