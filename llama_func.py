@@ -1,7 +1,7 @@
 import os
 from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader, download_loader
 from llama_index import Document, LLMPredictor, PromptHelper, QuestionAnswerPrompt, JSONReader
-from langchain.llms import OpenAIChat
+from langchain.llms import OpenAIChat, OpenAI
 from zipfile import ZipFile
 from googlesearch import search as google_search
 from baidusearch.baidusearch import search as baidu_search
@@ -26,17 +26,18 @@ def save_index(index, index_name, exist_ok=False):
                 break
             i += 1
 
-def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outputs=512, max_chunk_overlap=20, raw=False):
+def construct_index(api_key, file_list, index_name, max_input_size=4096, num_outputs=512, max_chunk_overlap=20, raw=False):
     if not raw:
         documents_set = []
-        with open(tmp_file.name, 'r', encoding="utf-8") as f:
-            documents_set.append(f.read())
+        for file in file_list:
+            with open(file.name, 'r', encoding="utf-8") as f:
+                documents_set.append(f.read())
         documents = [Document(k) for k in documents_set]
     else:
-        documents = [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in tmp_file]
+        documents = [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in file_list]
 
     # Customizing LLM
-    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
+    llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
     prompt_helper = PromptHelper(max_input_size, num_outputs, max_chunk_overlap)
 
     index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
@@ -54,19 +55,21 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
     print(f"Question: {question}")
     if question=="":
         question = suggested_user_question
+        
     if chat_tone == 0:
         temprature = 2
     elif chat_tone == 1:
         temprature = 1
     else:
         temprature = 0.5
+        
     if not search_mode:
         response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
     else:
         print(f"You asked: {question}")
         BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
         loader = BeautifulSoupWebReader()
-        chat = OpenAIChat(model_name="gpt-3.5-turbo", openai_api_key=api_key)
+        chat = OpenAI(model_name="gpt-3.5-turbo", openai_api_key=api_key)
         search_terms = chat.generate([f"Please extract search terms from the user’s question. The search terms is a concise sentence, which will be searched on Google to obtain relevant information to answer the user’s question, too generalized search terms doesn’t help. Please provide no more than two search terms. Please provide the most relevant search terms only, the search terms should directly correspond to the user’s question. Please separate different search items with commas, with no quote marks. The user’s question is: {question}"]).generations[0][0].text.strip()
         search_terms = search_terms.replace('"', '')
         search_terms = search_terms.replace(".", "")
@@ -124,7 +127,8 @@ def ask_ai(api_key, index_select, question, prompt_tmpl, prefix_messages=[], tem
 
     prompt = QuestionAnswerPrompt(prompt_tmpl)
 
-    llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
+    llm_predictor = LLMPredictor(llm=OpenAI(temperature=temprature, model_name="gpt-3.5-turbo", openai_api_key=api_key, prefix_messages=prefix_messages))
+    
     try:
         response = index.query(question, llm_predictor=llm_predictor, similarity_top_k=1, text_qa_template=prompt)
     except:
