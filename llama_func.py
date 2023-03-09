@@ -4,16 +4,17 @@ from llama_index import GPTSimpleVectorIndex, SimpleDirectoryReader, download_lo
 from llama_index import Document, LLMPredictor, PromptHelper, QuestionAnswerPrompt, JSONReader
 from langchain.llms import OpenAIChat
 from zipfile import ZipFile
-from googlesearch import search
+from googlesearch import search as google_search
+from baidusearch.baidusearch import search as baidu_search
 import traceback
 import openai
 
 from utils import *
 
-def save_index(index, index_name):
+def save_index(index, index_name, exist_ok=False):
     file_path = f"./index/{index_name}.json"
 
-    if not os.path.exists(file_path):
+    if not os.path.exists(file_path) or exist_ok:
         index.save_to_disk(file_path)
         print(f'Saved file "{file_path}".')
     else:
@@ -26,17 +27,14 @@ def save_index(index, index_name):
                 break
             i += 1
 
-def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outputs=512, max_chunk_overlap=20):
-    # directory_path = f"./data/{directory_name}"
-    documents_set = []
-    # for root, dirs, files in os.walk(directory_path):
-    #     for file in files:
-    #         with open(os.path.join(root, file), 'r', encoding="utf-8") as f:
-    #             documents_set.append(f.read())
-    # documents = [Document(k) for k in documents_set]
-    with open(tmp_file.name, 'r', encoding="utf-8") as f:
-        documents_set.append(f.read())
-    documents = [Document(k) for k in documents_set]
+def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outputs=512, max_chunk_overlap=20, raw=False):
+    if not raw:
+        documents_set = []
+        with open(tmp_file.name, 'r', encoding="utf-8") as f:
+            documents_set.append(f.read())
+        documents = [Document(k) for k in documents_set]
+    else:
+        documents = [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in tmp_file]
 
     # Customizing LLM
     llm_predictor = LLMPredictor(llm=OpenAIChat(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
@@ -44,10 +42,13 @@ def construct_index(api_key, tmp_file, index_name, max_input_size=4096, num_outp
 
     index = GPTSimpleVectorIndex(documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper)
 
-    save_index(index, index_name)
-
-    newlist = refresh_json_list(plain=True)
-    return newlist, newlist
+    if not raw:
+        save_index(index, index_name)
+        newlist = refresh_json_list(plain=True)
+        return newlist, newlist
+    else:
+        save_index(index, index_name, exist_ok=True)
+        return index
 
 def parse_text(text):
     lines = text.split("\n")
@@ -84,7 +85,7 @@ def parse_text(text):
     text = "".join(lines)
     return text
 
-def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=False, suggested_user_question = ""):
+def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=[], suggested_user_question = ""):
     os.environ["OPENAI_API_KEY"] = api_key
     print(f"Question: {question}")
     if question=="":
@@ -108,14 +109,23 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         links = []
         for keywords in search_terms.split(","):
             keywords = keywords.strip()
-            print(f"Googling: {keywords}")
-            search_iter = search(keywords, num_results=5)
-            links += [next(search_iter) for _ in range(5)]
+            for search_engine in search_mode:
+                if "Google" in search_engine:
+                    print(f"Googling: {keywords}")
+                    search_iter = google_search(keywords, num_results=5)
+                    links += [next(search_iter) for _ in range(5)]
+                if "Baidu" in search_engine:
+                    print(f"Baiduing: {keywords}")
+                    search_results = baidu_search(keywords, num_results=5)
+                    links += [i["url"] for i in search_results if i["url"].startswith("http")]
         links = list(set(links))
         print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
-        index = GPTSimpleVectorIndex(documents)
+        # convert to utf-8 encoding
+
+        index = construct_index(api_key, documents, " ".join(search_terms.split(",")), raw=True)
+
         print("Generating response...")
         response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature, raw = index)
     response = response.split("\n")
