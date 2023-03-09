@@ -1,2 +1,14 @@
-/.idea/
-*/__pycache__/
+# Ignore Mac system files
+.DS_store
+
+# Ignore node_modules folder
+node_modules
+
+# Ignore files related to API keys
+.env
+
+# Ignore SASS config files
+.sass-cache
+
+__pycache__
+index
