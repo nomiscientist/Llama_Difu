@@ -1,4 +1,5 @@
 gradio
 llama_index
+langchain
 googlesearch-python
 baidusearch
