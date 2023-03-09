@@ -1,6 +1,7 @@
 import os
 import gradio as gr
 from zipfile import ZipFile
+from presets import *
 
 def refresh_json_list(plain=False):
     json_list = []
@@ -22,6 +23,13 @@ def upload_file(file_obj):
                 }
             )
     return files
+
+def reset_textbox():
+    return gr.update(value='')
+
+def change_prompt_tmpl(tmpl_select):
+    new_tmpl = prompt_tmpl_dict[tmpl_select]
+    return gr.update(value=new_tmpl)
 
 def parse_text(text):
     lines = text.split("\n")
