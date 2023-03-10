@@ -7,9 +7,11 @@ Context information is below:
 
 {context_str}
 
-Given the above context, please answer the following question. Answer in bullet points.
+Given the above context, please answer the following question.
+Answer in bullet points.
 
-Question: {query_str}\
+Question: {query_str}
+Answer in the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch.
 """,
 
     "MZhao Mode":
