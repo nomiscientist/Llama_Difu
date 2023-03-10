@@ -31,16 +31,22 @@ def construct_index(api_key, file_list, index_name, max_input_size=4096, num_out
     if not raw:
         txt_set = []
         for file in file_list:
-            # 检测是否为pdf文件
             if os.path.splitext(file.name)[1] == '.pdf':
-                # 读取pdf文件
                 CJKPDFReader = download_loader("CJKPDFReader")
                 loader = CJKPDFReader()
+                documents += loader.load_data(file=file.name)
+            elif os.path.splitext(file.name)[1] == '.docx':
+                DocxReader = download_loader("DocxReader")
+                loader = DocxReader()
+                documents += loader.load_data(file=file.name)
+            elif os.path.splitext(file.name)[1] == '.epub':
+                EpubReader = download_loader("EpubReader")
+                loader = EpubReader()
                 documents += loader.load_data(file=file.name)
             else:
                 with open(file.name, 'r', encoding="utf-8") as f:
                     txt_set.append(f.read())
-        documents += [Document(k) for k in txt_set]
+                documents += [Document(k) for k in txt_set]
     else:
         documents += [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in file_list]
 
