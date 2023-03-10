@@ -105,8 +105,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         links = list(set(links))
         if len(links) == 0:
             print("No links found.")
-        elif len(links) > 5:
-            links = links[:5]
+            return context, chatbot, gr.Dropdown.update(choices=[])
         print("Extracting data from links...")
         print('\n'.join(links))
         documents = loader.load_data(urls=links)
