@@ -42,7 +42,7 @@ def construct_index(api_key, file_list, index_name, max_input_size=4096, num_out
                     txt_set.append(f.read())
         documents += [Document(k) for k in txt_set]
     else:
-        documents = [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in file_list]
+        documents += [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in file_list]
 
     # Customizing LLM
     llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, model_name="gpt-3.5-turbo", openai_api_key=api_key))
@@ -58,7 +58,7 @@ def construct_index(api_key, file_list, index_name, max_input_size=4096, num_out
         save_index(index, index_name, exist_ok=True)
         return index
 
-def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, chatbot, search_mode=[], suggested_user_question = ""):
+def chat_ai(api_key, index_select, question, prompt_tmpl, sim_k, chat_tone ,context, chatbot, search_mode=[], suggested_user_question = ""):
     os.environ["OPENAI_API_KEY"] = api_key
     print(f"Question: {question}")
     if question=="":
@@ -72,7 +72,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
         temprature = 0.5
 
     if not search_mode:
-        response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature)
+        response = ask_ai(api_key, index_select, question, prompt_tmpl, sim_k, context, temprature=temprature)
     else:
         print(f"You asked: {question}")
         BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")

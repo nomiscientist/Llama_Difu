@@ -85,9 +85,9 @@ with gr.Blocks() as llama_difu:
     query_box.submit(ask_ai, [api_key, index_select, query_box, prompt_tmpl, sim_k], [answer])
     tmpl_select.change(change_prompt_tmpl, [tmpl_select], [prompt_tmpl])
 
-    chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
+    chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, sim_k, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
     chat_input.submit(reset_textbox, [], [chat_input])
-    chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
+    chat_submit_btn.click(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, sim_k, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
     chat_submit_btn.click(reset_textbox, [], [chat_input])
     chat_empty_btn.click(lambda: ([], []), None, [chat_context, chatbot])
 

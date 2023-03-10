@@ -10,5 +10,6 @@ node_modules
 # Ignore SASS config files
 .sass-cache
 
+.vscode
 __pycache__
 index
