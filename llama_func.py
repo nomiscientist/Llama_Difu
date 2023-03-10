@@ -27,12 +27,20 @@ def save_index(index, index_name, exist_ok=False):
             i += 1
 
 def construct_index(api_key, file_list, index_name, max_input_size=4096, num_outputs=512, max_chunk_overlap=20, raw=False):
+    documents = []
     if not raw:
-        documents_set = []
+        txt_set = []
         for file in file_list:
-            with open(file.name, 'r', encoding="utf-8") as f:
-                documents_set.append(f.read())
-        documents = [Document(k) for k in documents_set]
+            # 检测是否为pdf文件
+            if os.path.splitext(file.name)[1] == '.pdf':
+                # 读取pdf文件
+                CJKPDFReader = download_loader("CJKPDFReader")
+                loader = CJKPDFReader()
+                documents += loader.load_data(file=file.name)
+            else:
+                with open(file.name, 'r', encoding="utf-8") as f:
+                    txt_set.append(f.read())
+        documents += [Document(k) for k in txt_set]
     else:
         documents = [Document(k.text.encode("UTF-8", errors="strict").decode()) for k in file_list]
 
