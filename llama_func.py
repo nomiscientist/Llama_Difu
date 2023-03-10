@@ -104,7 +104,9 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, chat_tone ,context, ch
                             links.append(link)
         links = list(set(links))
         if len(links) == 0:
-            print("No links found.")
+            msg = "No links found."
+            print(msg)
+            chatbot.append((question, msg))
             return context, chatbot, gr.Dropdown.update(choices=[])
         print("Extracting data from links...")
         print('\n'.join(links))
