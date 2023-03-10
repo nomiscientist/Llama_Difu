@@ -6,8 +6,8 @@
 
 ---
 
-A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index). Allow ChatGPT to access your own database.
-![image](https://user-images.githubusercontent.com/70903329/223749069-4aec7f09-7ff9-4fe5-9958-945cf2f64909.png)
+A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index). Allow ChatGPT to access your own content, even databases!
+
 
 ## Feature
 
@@ -22,6 +22,22 @@ A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index). 
 - [X] Multi-files support
 - [ ] More LLMPredictor
 - [ ] More Index methods
+
+## Screenshot
+
+**Ask Mode**
+![image](https://user-images.githubusercontent.com/70903329/224219711-b2ff45d7-7584-479b-9ddf-0e44a42a93b1.png)
+
+**New Google**
+
+Check the "Search Google" checkbox, the chatbot will search the web for you and generate contents based on that. Just like the New Bing, but uses Google!
+
+It's recommended to use the Balanced or Precise mode when using New Google.
+
+![image](https://user-images.githubusercontent.com/70903329/224219722-92f0d8b9-3100-4009-95b9-5d406d3d951f.png)
+
+**Construct your own index**
+![image](https://user-images.githubusercontent.com/70903329/224219727-725d865d-a3fb-40a9-ba6f-8bc2e3448d15.png)
 
 ## Usage
 
@@ -43,12 +59,3 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
-
-## New Google
-
-Check the "Search Google" checkbox, the chatbot will search the web for you and generate contents based on that. Just like the New Bing, but uses Google!
-
-It's recommended to use the Balanced or Precise mode when using New Google.
-
-<img width="1129" alt="image" src="https://user-images.githubusercontent.com/51039745/223800748-d48d0c32-844a-4476-b155-702db17d11c9.png">
-<img width="615" alt="image" src="https://user-images.githubusercontent.com/51039745/223800850-ce590512-811f-45c5-8e48-ff12cda43b2d.png">
