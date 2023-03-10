@@ -78,7 +78,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, sim_k, chat_tone ,cont
         temprature = 0.5
 
     if not search_mode:
-        response = ask_ai(api_key, index_select, question, prompt_tmpl, sim_k, context, temprature=temprature)
+        response = ask_ai(api_key, index_select, question, prompt_tmpl, sim_k, temprature, context)
     else:
         print(f"You asked: {question}")
         BeautifulSoupWebReader = download_loader("BeautifulSoupWebReader")
@@ -122,7 +122,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, sim_k, chat_tone ,cont
         index = construct_index(api_key, documents, " ".join(search_terms.split(",")), raw=True)
 
         print("Generating response...")
-        response = ask_ai(api_key, index_select, question, prompt_tmpl, context, temprature=temprature, raw = index)
+        response = ask_ai(api_key, index_select, question, prompt_tmpl, sim_k, temprature, context, raw = index)
     response = response.split("\n")
     suggested_next_turns = []
     for index, line in enumerate(response):
@@ -141,7 +141,7 @@ def chat_ai(api_key, index_select, question, prompt_tmpl, sim_k, chat_tone ,cont
 
 
 
-def ask_ai(api_key, index_select, question, prompt_tmpl, sim_k=1, prefix_messages=[], temprature=0, raw = None):
+def ask_ai(api_key, index_select, question, prompt_tmpl, sim_k=1, temprature=0, prefix_messages=[], raw = None):
     os.environ["OPENAI_API_KEY"] = api_key
     if raw is not None:
         index = raw

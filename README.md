@@ -8,13 +8,13 @@
 
 A Web-UI for [Llama_index](https://github.com/jerryjliu/gpt_index) (gpt_index). Allow ChatGPT to access your own content, even databases!
 
-
 ## Feature
 
 - [X] Allow ChatGPT to access your own database
 - [X] New Google: like new Bing, but uses Google!
 - [X] Simple Query
 - [X] Simple Construct index (Only support GPTSimpleVectorIndex now)
+  - [X] support .txt, .pdf, .docx, .epub
 - [X] Customize prompt template
 - [X] Customize PromptHelper
 - [X] .json View

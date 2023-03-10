@@ -15,7 +15,7 @@ with gr.Blocks() as llama_difu:
         with gr.Column(scale=1):
             with gr.Box():
                 gr.Markdown("**OpenAI API-Key**")
-                api_key = gr.Textbox(show_label=False, placeholder="Please enter your OpenAI API-key",label="OpenAI API-Key", value="", type="password").style(container=False)
+                api_key = gr.Textbox(show_label=False, placeholder="Please enter your OpenAI API-key",label="OpenAI API-Key", value="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", type="password").style(container=False)
         with gr.Column(scale=3):
             with gr.Box():
                 gr.Markdown("**Select Index**")
@@ -32,7 +32,9 @@ with gr.Blocks() as llama_difu:
                 gr.Markdown("## Ask")
                 with gr.Column():
                     with gr.Accordion("Prompt Template", open=False):
-                        sim_k = gr.Slider(1, 10, 1, step=1, label="The Number of Similarity chunks", interactive=True, show_label=True)
+                        with gr.Row():
+                            sim_k = gr.Slider(1, 10, 1, step=1, label="The Number of Similarity chunks", interactive=True, show_label=True)
+                            tempurature = gr.Slider(0, 2, 0.5, step=0.1, label="Temperature", interactive=True, show_label=True)
                         tmpl_select = gr.Radio(prompt_tmpl_list, value="Default", label="pre-prompt-template", interactive=True)
                         prompt_tmpl = gr.Textbox(value=prompt_tmpl_dict["Default"], show_label=False)
                     query_box = gr.Textbox(lines=3, show_label=False).style(container=False)
@@ -60,7 +62,7 @@ with gr.Blocks() as llama_difu:
     with gr.Tab("Construct"):
         with gr.Row():
             with gr.Column():
-                upload_file = gr.Files(label="Upload Files(Support .txt, .pdf)")
+                upload_file = gr.Files(label="Upload Files(Support .txt, .pdf, .epub, .docx)")
                 with gr.Row():
                     max_input_size = gr.Slider(256, 4096, 4096, step=1, label="Max Input Size", interactive=True, show_label=True)
                     num_outputs = gr.Slider(256, 4096, 512, step=1, label="Num Outputs", interactive=True, show_label=True)
@@ -81,8 +83,7 @@ with gr.Blocks() as llama_difu:
                     json_display = gr.JSON(label="View index json")
 
     index_refresh_btn.click(refresh_json_list, None, [index_select])
-    query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl, sim_k], [answer])
-    query_box.submit(ask_ai, [api_key, index_select, query_box, prompt_tmpl, sim_k], [answer])
+    query_btn.click(ask_ai, [api_key, index_select, query_box, prompt_tmpl, sim_k, tempurature], [answer])
     tmpl_select.change(change_prompt_tmpl, [tmpl_select], [prompt_tmpl])
 
     chat_input.submit(chat_ai, [api_key, index_select, chat_input, prompt_tmpl, sim_k, chat_tone, chat_context, chatbot, search_options_checkbox, suggested_user_turns], [chat_context, chatbot, suggested_user_turns])
@@ -97,4 +98,4 @@ with gr.Blocks() as llama_difu:
 
 
 if __name__ == '__main__':
-    llama_difu.queue().launch()
+    llama_difu.queue().launch(share=True)
